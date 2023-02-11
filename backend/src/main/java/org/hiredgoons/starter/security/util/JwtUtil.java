@@ -1,6 +1,7 @@
 package org.hiredgoons.starter.security.util;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -27,6 +28,7 @@ public class JwtUtil {
 				.withIssuedAt(Instant.now())
 				.withIssuer("me")
 				.withExpiresAt(expiration)
+				.withJWTId(UUID.randomUUID().toString())
 				.sign(Algorithm.HMAC256(secret));
 	}
 	
