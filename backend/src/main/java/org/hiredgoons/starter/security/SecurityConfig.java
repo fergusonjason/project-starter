@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,16 +24,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 	
-
-	// this will probably cause a circular dependency
-	@Autowired
-	private AuthenticationProcessingFilter authenticationProcessingFilter;
-	
 	@Autowired
 	private JwtFilter jwtFilter;
 	
 	@Value("${app.jwt.auth.headername}")
-	private String authorizationHeader;
+	private String authorizationHeaderName;
+	
+	@Bean
+	@Lazy
+	public AuthenticationProcessingFilter authenticationProcessingFilter() {
+		return new AuthenticationProcessingFilter();
+	}
 	
 	/**
 	 * Return the global AuthenticationManager, you'll need this for the implementation of the
@@ -44,6 +45,7 @@ public class SecurityConfig {
 	 */
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		
 		AuthenticationManager result = authConfig.getAuthenticationManager();
 		return result;
 	}
@@ -61,8 +63,8 @@ public class SecurityConfig {
 		CorsConfiguration corsConfig = new CorsConfiguration();
 		corsConfig.setAllowedOrigins(Arrays.asList("*"));
 		corsConfig.setExposedHeaders(Arrays.asList("*"));
-		corsConfig.setAllowedHeaders(Arrays.asList(authorizationHeader));
-		corsConfig.setExposedHeaders(Arrays.asList(authorizationHeader));
+		corsConfig.setAllowedHeaders(Arrays.asList(authorizationHeaderName));
+		corsConfig.setExposedHeaders(Arrays.asList(authorizationHeaderName));
 		
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", corsConfig);		
@@ -82,7 +84,7 @@ public class SecurityConfig {
 		// the RequestMatcher in that filter should only process your login url,
 		// i.e. "/login"
 		http
-			.addFilterAfter(authenticationProcessingFilter, ConcurrentSessionFilter.class)
+			.addFilterAfter(authenticationProcessingFilter(), ConcurrentSessionFilter.class)
 			.addFilterAfter(jwtFilter, AuthenticationProcessingFilter.class)
 			.authorizeRequests()
 				.antMatchers("/login/**","/token/refresh**").permitAll()
