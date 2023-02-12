@@ -3,7 +3,6 @@ package org.hiredgoons.starter.security.util;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
