@@ -178,8 +178,13 @@ public class JwtUtil {
 		} catch (UsernameNotFoundException e) {
 			throw new JWTVerificationException("Unable to verify subject, username not found", e);
 		}
-
 		
+	}
+	
+	public String getJwtSubject(String token) {
+		
+		DecodedJWT jwt = JWT.decode(token);
+		return jwt.getSubject();
 	}
 	
 	private void verifyUser(String username) throws JWTVerificationException {
@@ -208,4 +213,5 @@ public class JwtUtil {
 			throw new InvalidClaimException("Token claims roles unassigned to user");				
 		}		
 	}
+	
 }
