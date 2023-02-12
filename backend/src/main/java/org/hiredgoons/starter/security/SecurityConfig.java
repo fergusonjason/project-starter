@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hiredgoons.starter.security.filter.AuthenticationProcessingFilter;
 import org.hiredgoons.starter.security.filter.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -31,6 +32,9 @@ public class SecurityConfig {
 	
 	@Autowired
 	private JwtFilter jwtFilter;
+	
+	@Value("${app.jwt.auth.headername}")
+	private String authorizationHeader;
 	
 	/**
 	 * Return the global AuthenticationManager, you'll need this for the implementation of the
@@ -58,8 +62,8 @@ public class SecurityConfig {
 		CorsConfiguration corsConfig = new CorsConfiguration();
 		corsConfig.setAllowedOrigins(Arrays.asList("*"));
 		corsConfig.setExposedHeaders(Arrays.asList("*"));
-		corsConfig.setAllowedHeaders(Arrays.asList("Authorization"));
-		corsConfig.setExposedHeaders(Arrays.asList("Authorization"));
+		corsConfig.setAllowedHeaders(Arrays.asList(authorizationHeader));
+		corsConfig.setExposedHeaders(Arrays.asList(authorizationHeader));
 		
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", corsConfig);		
