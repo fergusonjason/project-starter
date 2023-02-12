@@ -70,6 +70,9 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		
+		// if you don't set this up now, you'll never set it up again.
+		// you must never break this.
+		
 		//@formatter:off
 		
 		// add your implementation of AbstractAuthenticationProcessingFilter here,
