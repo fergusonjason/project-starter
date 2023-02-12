@@ -4,11 +4,13 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hiredgoons.starter.security.filter.AuthenticationProcessingFilter;
+import org.hiredgoons.starter.security.filter.JwtFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +23,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @Profile("dev")
 public class SecurityConfig {
+	
+
+	// this will probably cause a circular dependency
+	@Autowired
+	private AuthenticationProcessingFilter authenticationProcessingFilter;
+	
+	@Autowired
+	private JwtFilter jwtFilter;
 	
 	/**
 	 * Return the global AuthenticationManager, you'll need this for the implementation of the
@@ -66,11 +76,11 @@ public class SecurityConfig {
 		// the RequestMatcher in that filter should only process your login url,
 		// i.e. "/login"
 		http
-			.addFilterAfter(null, ConcurrentSessionFilter.class);
+			.addFilterAfter(authenticationProcessingFilter, ConcurrentSessionFilter.class);
 		
 		// add the JWT filter here immediately after the previous filter
 		http
-			.addFilterAfter(null, null);
+			.addFilterAfter(jwtFilter, AuthenticationProcessingFilter.class);
 		
 		// you'll need to fix this to properly authorize requests, i.e.
 		//   .antMatchers("/api/**").authenticated()
