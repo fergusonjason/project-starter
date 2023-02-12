@@ -9,6 +9,7 @@ import org.hiredgoons.starter.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,24 +48,19 @@ public class TokenController {
 		TokenHolder result = new TokenHolder(refresh, access);
 		return result;
 	}
-	
-//	@PostMapping("/refresh")
-//	public TokenHolder refresh(@RequestBody TokenHolder tokenHolder) throws JWTVerificationException {
-//		
-//		// ensure the request token is valid
-//		jwtUtil.verifyRefreshToken(tokenHolder.getRefreshToken());
-//		String username = jwtUtil.getJwtSubject(tokenHolder.getRefreshToken());
-//		
-//		String refreshToken = jwtUtil.generateRefreshToken(username);
-//		String accessToken = jwtUtil.generateAccessToken(username);
-//		
-//		TokenHolder result = new TokenHolder(refreshToken, accessToken);
-//		return result;
-//		
-//	}
+
+	// TODO: Convert these to a dedicated ApiError response
 
 	@ExceptionHandler(JWTVerificationException.class)
 	public ResponseEntity<String> handleJwtVerificationException(HttpServletResponse response, JWTVerificationException e) throws IOException {
+		
+		String resultMessage = e.getMessage();
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + resultMessage);
+		
+	}
+	
+	@ExceptionHandler(HttpMessageConversionException.class)
+	public ResponseEntity<String> handleHttpMessageConversionException(HttpServletResponse response, HttpMessageConversionException e) throws IOException {
 		
 		String resultMessage = e.getMessage();
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + resultMessage);
