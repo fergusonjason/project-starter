@@ -22,7 +22,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
-@Profile("dev")
 public class SecurityConfig {
 	
 
@@ -83,43 +82,22 @@ public class SecurityConfig {
 		// the RequestMatcher in that filter should only process your login url,
 		// i.e. "/login"
 		http
-			.addFilterAfter(authenticationProcessingFilter, ConcurrentSessionFilter.class);
-		
-		// add the JWT filter here immediately after the previous filter
-		http
-			.addFilterAfter(jwtFilter, AuthenticationProcessingFilter.class);
-		
-		// you'll need to fix this to properly authorize requests, i.e.
-		//   .antMatchers("/api/**").authenticated()
-		http
+			.addFilterAfter(authenticationProcessingFilter, ConcurrentSessionFilter.class)
+			.addFilterAfter(jwtFilter, AuthenticationProcessingFilter.class)
 			.authorizeRequests()
-				.anyRequest()
-					.permitAll();
-		
-		// Don't need CSRF with JWTs
-		http
-			.csrf()
-				.disable();
-		
-		// remove this if you don't have to configure CORS (frontend and backend
-		// need to be running on the same host, on the same port)
-		http
-			.cors()
-				.configurationSource(corsConfiguration());
-		
-		// Set sessions to STATELESS since we are using JWTs
-		http
-			.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		
-		// Override the authentication entry point to send 401 instead of
-		// trying to send a page. Replace with your own implementation
-		// of AuthenticationEntryPoint if you need to get fancy.
-		http
+				.antMatchers("/login/**","/token/refresh**").permitAll()
+				.anyRequest().permitAll()
+			.and()
+			.csrf().disable()
+			.cors().configurationSource(corsConfiguration())
+			.and()
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			.and()
 			.exceptionHandling()
 				.authenticationEntryPoint((request, response, e) -> {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 				});
+			
 		//@formatter:on
 		
 		return http.build();
