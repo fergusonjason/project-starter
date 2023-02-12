@@ -18,10 +18,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		User user;
 		switch (username) {
 		case "USER":
-			user = new User("USER", null, Arrays.asList(new SimpleGrantedAuthority("USER")));
+			user = new User("USER", "", Arrays.asList(new SimpleGrantedAuthority("USER")));
 			break;
 		case "ADMIN":
-			user = new User("ADMIN", null,
+			user = new User("ADMIN", "",
 					Arrays.asList(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ADMIN")));
 			break;
 		default:
